@@ -41,6 +41,18 @@ config EEPROM_AT25
 	  This driver can also be built as a module.  If so, the module
 	  will be called at25.
 
+config FRAM_FM25
+	tristate "SPI Cypress FRAM"
+	depends on SPI && SYSFS
+	help
+	  Enable this driver to get read/write support to SPI FRAMs,
+	  after you configure the board init code to know about each fram
+	  on your target board.
+
+	  This driver can also be built as a module.  If so, the module
+	  will be called fm25.
+
+
 config EEPROM_LEGACY
 	tristate "Old I2C EEPROM reader"
 	depends on I2C && SYSFS
