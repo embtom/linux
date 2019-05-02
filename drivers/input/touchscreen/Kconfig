@@ -1311,4 +1311,17 @@ config TOUCHSCREEN_ROHM_BU21023
 	  To compile this driver as a module, choose M here: the
 	  module will be called bu21023_ts.
 
+config TOUCHSCREEN_EMBTOM
+	tristate "embtom serial touchscreen"
+	select SERIO
+	help
+	  Say Y here if you have a embtom serial touchscreen connected to
+	  your system.
+
+	  If unsure, say N.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called embtom_ts.
+
+
 endif
