@@ -786,6 +786,15 @@
 				status = "disabled";
 			};
 
+			weim: weim@63fda000 {
+				#address-cells = <2>;
+				#size-cells = <1>;
+				compatible = "fsl,imx50-weim";
+				reg = <0x63fda000 0x1000>;
+				clocks = <&clks IMX5_CLK_EMI_SLOW_GATE>;
+				status = "disabled";
+			};
+
 			fec: ethernet@63fec000 {
 				compatible = "fsl,imx53-fec", "fsl,imx25-fec";
 				reg = <0x63fec000 0x4000>;
