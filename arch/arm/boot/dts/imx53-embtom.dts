@@ -1,0 +1,495 @@
+/dts-v1/;
+#include "imx53.dtsi"
+
+/ {
+	model = "imx53-embtom";
+	compatible = "embtom", "fsl,imx53";
+
+	aliases {
+		display = &lvds0;
+		lvds0 = &lvds0;
+	};
+
+	chosen {
+		stdout-path = &uart1;
+	};
+	memory@70000000 {
+		reg = <0x70000000 0x20000000>,
+		      <0xb0000000 0x20000000>;
+	};
+
+	regulators {
+		compatible = "simple-bus";
+		#address-cells = <1>;
+		#size-cells = <0>;
+	
+		reg_usb_otg_vbus: regulator1 {
+			pinctrl-0 = <&pinctrl_usb_otg_vbus>;
+			compatible = "regulator-fixed";
+			reg = <0>;
+			regulator-name = "usbotg_vbus";
+			regulator-min-microvolt = <5000000>;
+			regulator-max-microvolt = <5000000>;
+			gpio = <&gpio4 15 GPIO_ACTIVE_HIGH>;
+			enable-active-high;
+		};
+
+		reg_lcd_bl_on: regulator2 {
+			pinctrl-0 = <&pinctrl_reg_lcd_bl_on>;
+			compatible = "regulator-fixed";
+			reg = <1>;
+			pinctrl-names = "default";
+			regulator-name = "lcdbl";
+			regulator-min-microvolt = <12000000>;
+			regulator-max-microvolt = <12000000>;
+			gpio = <&gpio1 20 GPIO_ACTIVE_HIGH>;
+			enable-active-high;
+		};
+		reg_lcd_on: regulator3 {
+			pinctrl-0 = <&pinctrl_reg_lcd_on>;
+			compatible = "regulator-fixed";
+			reg = <2>;
+			pinctrl-names = "default";
+			regulator-name = "lcd12v";
+			regulator-min-microvolt = <12000000>;
+			regulator-max-microvolt = <12000000>;
+			gpio = <&gpio5 19 GPIO_ACTIVE_HIGH>;
+			enable-active-high;
+		};
+	};
+
+	backlight: backlight {
+		compatible = "pwm-backlight";
+		pwms = <&pwm1 0 5000000>;
+		brightness-levels = <   0   1   2   3   4   5   6   7   8   9
+				       10  11  12  13  14  15  16  17  18  19	 
+				       20  21  22  23  24  25  26  27  28  29	 
+				       30  31  32  33  34  35  36  37  38  39	 
+				       40  41  42  43  44  45  46  47  48  49	 
+				       50  51  52  53  54  55  56  57  58  59	 
+				       60  61  62  63  64  65  66  67  68  69	 
+				       70  71  72  73  74  75  76  77  78  79	 
+				       80  81  82  83  84  85  86  87  88  89	 
+				       90  91  92  93  94  95  96  97  98  99	 
+		              100 101 102 103 104 105 106 107 108 109
+				      110 111 112 113 114 115 116 117 118 119	 
+				      120 121 122 123 124 125 126 127 128 129	 
+				      130 131 132 133 134 135 136 137 138 139	 
+				      140 141 142 143 144 145 146 147 148 149	 
+				      150 151 152 153 154 155 156 157 158 159	 
+				      160 161 162 163 164 165 166 167 168 169	 
+				      170 171 172 173 174 175 176 177 178 179	 
+				      180 181 182 183 184 185 186 187 188 189	 
+				      190 191 192 193 194 195 196 197 198 199	 
+		              200 201 202 203 204 205 206 207 208 209
+				      210 211 212 213 214 215 216 217 218 219	 
+				      220 221 222 223 224 225 226 227 228 229	 
+				      230 231 232 233 234 235 236 237 238 239	 
+				      240 241 242 243 244 245 246 247 248 249	 
+				      250 251 252 253 254 255>;
+		default-brightness-level = <255>;
+		pinctrl-names = "default";
+		power-supply = <&reg_lcd_bl_on>;
+		status = "okay";
+	};
+
+	panel: panel {
+		compatible = "auo,g065vn01";
+		backlight = <&backlight>;
+		enable-gpios = <&gpio5 18 GPIO_ACTIVE_LOW>, 
+					   <&gpio5 21 GPIO_ACTIVE_LOW>;
+		power-supply = <&reg_lcd_on>;
+		port {
+			panel_lcd: endpoint {
+				remote-endpoint = <&lvds0_out>;
+			};
+		};
+	};
+
+};
+
+&iomuxc {
+	pinctrl-names = "default";
+	imx53-embtom {
+		pinctrl_nor: nor_grp{
+			fsl,pins = <
+				MX53_PAD_EIM_DA0__EMI_NAND_WEIM_DA_0	0x80000000	
+				MX53_PAD_EIM_DA1__EMI_NAND_WEIM_DA_1	0x80000000	
+				MX53_PAD_EIM_DA2__EMI_NAND_WEIM_DA_2	0x80000000
+				MX53_PAD_EIM_DA3__EMI_NAND_WEIM_DA_3	0x80000000
+				MX53_PAD_EIM_DA4__EMI_NAND_WEIM_DA_4	0x80000000
+				MX53_PAD_EIM_DA5__EMI_NAND_WEIM_DA_5	0x80000000
+				MX53_PAD_EIM_DA6__EMI_NAND_WEIM_DA_6	0x80000000
+				MX53_PAD_EIM_DA7__EMI_NAND_WEIM_DA_7	0x80000000
+				MX53_PAD_EIM_DA8__EMI_NAND_WEIM_DA_8	0x80000000
+				MX53_PAD_EIM_DA9__EMI_NAND_WEIM_DA_9	0x80000000
+				MX53_PAD_EIM_DA10__EMI_NAND_WEIM_DA_10	0x80000000
+				MX53_PAD_EIM_DA11__EMI_NAND_WEIM_DA_11	0x80000000
+				MX53_PAD_EIM_DA12__EMI_NAND_WEIM_DA_12	0x80000000
+				MX53_PAD_EIM_DA13__EMI_NAND_WEIM_DA_13	0x80000000
+				MX53_PAD_EIM_DA14__EMI_NAND_WEIM_DA_14	0x80000000
+				MX53_PAD_EIM_DA15__EMI_NAND_WEIM_DA_15	0x80000000
+				MX53_PAD_EIM_A16__EMI_WEIM_A_16			0x80000000
+				MX53_PAD_EIM_A17__EMI_WEIM_A_17			0x80000000
+				MX53_PAD_EIM_A18__EMI_WEIM_A_18			0x80000000
+				MX53_PAD_EIM_A19__EMI_WEIM_A_19			0x80000000
+				MX53_PAD_EIM_A20__EMI_WEIM_A_20			0x80000000
+				MX53_PAD_EIM_A21__EMI_WEIM_A_21			0x80000000
+				MX53_PAD_EIM_A22__EMI_WEIM_A_22			0x80000000
+				MX53_PAD_EIM_A23__EMI_WEIM_A_23			0x80000000
+				MX53_PAD_EIM_A24__EMI_WEIM_A_24			0x80000000
+				MX53_PAD_EIM_A25__EMI_WEIM_A_25			0x80000000
+				MX53_PAD_EIM_D16__EMI_WEIM_D_16			0x80000000
+				MX53_PAD_EIM_D17__EMI_WEIM_D_17			0x80000000
+				MX53_PAD_EIM_D18__EMI_WEIM_D_18			0x80000000
+				MX53_PAD_EIM_D19__EMI_WEIM_D_19			0x80000000
+				MX53_PAD_EIM_D20__EMI_WEIM_D_20			0x80000000
+				MX53_PAD_EIM_D21__EMI_WEIM_D_21			0x80000000
+				MX53_PAD_EIM_D22__EMI_WEIM_D_22			0x80000000
+				MX53_PAD_EIM_D23__EMI_WEIM_D_23			0x80000000
+				MX53_PAD_EIM_D24__EMI_WEIM_D_24			0x80000000
+				MX53_PAD_EIM_D25__EMI_WEIM_D_25			0x80000000
+				MX53_PAD_EIM_D26__EMI_WEIM_D_26			0x80000000
+				MX53_PAD_EIM_D27__EMI_WEIM_D_27			0x80000000
+				MX53_PAD_EIM_D28__EMI_WEIM_D_28			0x80000000
+				MX53_PAD_EIM_D29__EMI_WEIM_D_29			0x80000000
+				MX53_PAD_EIM_D30__EMI_WEIM_D_30			0x80000000
+				MX53_PAD_EIM_D31__EMI_WEIM_D_31			0x80000000
+				MX53_PAD_EIM_CS0__EMI_WEIM_CS_0			0x80000000
+				MX53_PAD_EIM_EB0__EMI_WEIM_EB_0			0x80000000
+				MX53_PAD_EIM_EB1__EMI_WEIM_EB_1			0x80000000
+				MX53_PAD_EIM_LBA__EMI_WEIM_LBA			0x80000000
+				MX53_PAD_EIM_OE__EMI_WEIM_OE			0x80000000
+				MX53_PAD_EIM_RW__EMI_WEIM_RW			0x80000000
+				MX53_PAD_EIM_WAIT__EMI_WEIM_WAIT		0x80000000
+			>;
+		};
+	/*	pinctrl_fec: fexgrp {
+			fsl,pins = <
+				MX53_PAD_FEC_MDIO__FEC_MDIO			0x800001fc
+				MX53_PAD_FEC_MDC__FEC_MDC       	0x80000004
+				MX53_PAD_FEC_RXD1__FEC_RDATA_1		0x80000180
+				MX53_PAD_FEC_RXD0__FEC_RDATA_0  	0x80000180
+				MX53_PAD_FEC_TXD1__FEC_TDATA_1  	0x80000004
+				MX53_PAD_FEC_TXD0__FEC_TDATA_0  	0x80000004
+				MX53_PAD_FEC_TX_EN__FEC_TX_EN   	0x80000004
+				MX53_PAD_FEC_REF_CLK__FEC_TX_CLK  	0x80000180
+				MX53_PAD_FEC_RX_ER__FEC_RX_ER		0x80000180
+				MX53_PAD_KEY_COL3__FEC_CRS			0x80000180
+				MX53_PAD_FEC_MDIO__FEC_COL			0x80000180
+				MX53_PAD_FEC_CRS_DV__FEC_RX_DV      0x80000180
+				MX53_PAD_KEY_COL1__FEC_RX_CLK		0x80000180
+			>;
+		};*/
+		pinctrl_can1: can1grp {
+			fsl,pins = <
+				MX53_PAD_GPIO_7__CAN1_TXCAN  		0x800001ed
+				MX53_PAD_GPIO_8__CAN1_RXCAN         0x800001ed
+			>;
+		};
+		pinctrl_can2: can2grp {
+			fsl,pins = <
+				MX53_PAD_PATA_RESET_B__CAN2_TXCAN  	0x800001ed
+				MX53_PAD_PATA_IORDY__CAN2_RXCAN     0x800001ed
+			>;
+		};
+		pinctrl_ecspi1: ecspi1grp {
+			fsl,pins = < 
+				MX53_PAD_CSI0_DAT4__ECSPI1_SCLK		0x1e4
+				MX53_PAD_CSI0_DAT5__ECSPI1_MOSI     0x1e4
+				MX53_PAD_CSI0_DAT6__ECSPI1_MISO		0x1e4
+				MX53_PAD_CSI0_DAT7__GPIO5_25		0x1e4 
+			>;
+		};
+		pinctrl_uart1: uart1grp {
+			fsl,pins = <
+				MX53_PAD_PATA_DMACK__UART1_RXD_MUX  0x1e4
+				MX53_PAD_PATA_DIOW__UART1_TXD_MUX   0x1e4
+			>;
+		};
+		pinctrl_uart2: uart2grp{
+			fsl,pins = <
+				MX53_PAD_PATA_BUFFER_EN__UART2_RXD_MUX  0x1e4
+				MX53_PAD_PATA_DMARQ__UART2_TXD_MUX   0x1e4
+			>;
+		};
+		pinctrl_uart3: uart3grp{
+			fsl,pins = <
+				MX53_PAD_PATA_CS_1__UART3_RXD_MUX  	0x1e4
+				MX53_PAD_PATA_CS_0__UART3_TXD_MUX   0x1e4
+			>;
+		};
+		pinctrl_i2c1:i2c1grp{
+			fsl,pins = <
+				MX53_PAD_CSI0_DAT8__I2C1_SDA 0xc0000000
+				MX53_PAD_CSI0_DAT9__I2C1_SCL 0xc0000000 
+			>;
+		};
+
+		pinctrl_usb_otg_vbus: usb-otg-vbusgrp {
+			fsl,pins = <
+				MX53_PAD_KEY_ROW4__GPIO4_15		0x1c4
+			>;
+		};
+
+		pinctrl_usb_otg: usbotggrp {
+			fsl,pins = <
+				MX53_PAD_KEY_COL4__USBOH3_USBOTG_OC	0x180
+			>;
+		};
+
+		pinctrl_lvds0: lvds0-grp1 {
+			fsl,pins = <
+				MX53_PAD_LVDS0_TX3_P__LDB_LVDS0_TX3 0x80000000
+				MX53_PAD_LVDS0_CLK_P__LDB_LVDS0_CLK 0x80000000
+				MX53_PAD_LVDS0_TX2_P__LDB_LVDS0_TX2 0x80000000
+				MX53_PAD_LVDS0_TX1_P__LDB_LVDS0_TX1 0x80000000
+				MX53_PAD_LVDS0_TX0_P__LDB_LVDS0_TX0 0x80000000
+			>;
+		};
+
+		pinctrl_reg_lcd_on: reg_lcdongrp {
+			fsl,pins = <
+				MX53_PAD_CSI0_MCLK__GPIO5_19	0x1c4		
+			>;
+		};
+
+		pinctrl_reg_lcd_bl_on: reg_lcdblgrp {
+			fsl,pins = <
+				MX53_PAD_SD1_CLK__GPIO1_20   	0x1c4
+			>;
+		};
+
+		pinctrl_pwm1: pwm1grp {
+			fsl,pins = <
+				MX53_PAD_SD1_DATA3__PWM1_PWMO 	0x1e4
+			>;
+		};
+	};
+};
+
+&weim {
+    compatible = "fsl,imx50-weim";
+    ranges = <0 0 0xf0000000 0x08000000>;
+    fsl,weim-cs-gpr = <&pinctrl_nor>;
+    status = "okay";
+
+    nor@0,0 {
+        compatible = "cfi-flash";
+        reg = <0 0 0x8000000>;
+        #address-cells = <1>;
+        #size-cells = <1>;
+        bank-width = <2>;
+		fsl,weim-cs-timing = <0x10320281 0x00001002 0x0e020000
+				0x0000a000 0x07000000 0x00000000>;
+        status = "okay";
+		
+        partition@0 {
+			reg = <0xC0000 0x20000>;
+			label = "nor.uboot.env";
+            read-only;
+		};
+
+		partition@40000 {
+			reg = <0x100000 0x500000>;
+			label = "nor.kernel";
+			read-only;
+		};
+
+		partition@900000 {
+			reg = <0x600000 0x3A00000>;			/* reduced to a total of 55MB for faster rootfs update, max possible size +64MB */ 
+			label = "nor.rootfs";
+		};
+    };
+};
+
+&fec {
+	pinctrl-names = "default";
+	/*pinctrl-0 = <&pinctrl_fec>; */
+	phy-reset-gpios = <&gpio4 7 GPIO_ACTIVE_LOW>;
+	phy-mode = "rmii";
+	status = "okay";
+};
+
+&can1 {
+    pinctrl-names = "default";
+    pinctrl-0 = <&pinctrl_can1>;
+    status = "okay";
+};
+
+&can2 {
+    pinctrl-names = "default";
+    pinctrl-0 = <&pinctrl_can2>;
+	status = "okay";
+};
+
+&i2c1 {
+	pinctrl-names = "default";
+    pinctrl-0 = <&pinctrl_i2c1>;
+	clock-frequency = <100000>;
+	status = "okay";
+	rtc@68 {
+		compatible = "dallas,ds1307";
+		reg = <0x68>;
+		trickle-diode-disable = <1>;
+		trickle-resistor-ohms = <250>;
+	};
+	adc@48 {
+		compatible = "ti,ads1015";
+		reg = <0x48>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		channel@1 {
+			reg = <4>;
+			ti,gain = <1>;
+			ti,datarate = <2>;
+		};
+		channel@2 {
+			reg = <5>;
+			ti,gain = <1>;
+			ti,datarate = <2>;
+		};
+		channel@3 {
+			reg = <6>;
+			ti,gain = <1>;
+			ti,datarate = <2>;
+		};
+		channel@4 {
+			reg = <7>;
+			ti,gain = <1>;
+			ti,datarate = <2>;
+		};
+	};
+	adc@49 {
+		compatible = "ti,ads1015";
+		reg = <0x49>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		channel@1 {
+			reg = <4>;
+			ti,gain = <1>;
+			ti,datarate = <2>;
+		};
+		channel@2 {
+			reg = <5>;
+			ti,gain = <1>;
+			ti,datarate = <2>;
+		};
+		channel@3 {
+			reg = <6>;
+			ti,gain = <1>;
+			ti,datarate = <2>;
+		};
+		channel@4 {
+			reg = <7>;
+			ti,gain = <1>;
+			ti,datarate = <2>;
+		};
+	};
+	adc@4a {
+		compatible = "ti,ads1015";
+		reg = <0x4a>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		channel@1 {
+			reg = <4>;
+			ti,gain = <1>;
+			ti,datarate = <2>;
+		};
+		channel@2 {
+			reg = <5>;
+			ti,gain = <1>;
+			ti,datarate = <2>;
+		};
+		channel@3 {
+			reg = <6>;
+			ti,gain = <1>;
+			ti,datarate = <2>;
+		};
+		channel@4 {
+			reg = <7>;
+			ti,gain = <1>;
+			ti,datarate = <2>;
+		};
+	};
+};
+
+&ecspi1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_ecspi1>;
+	cs-gpios = <&gpio5 25 GPIO_ACTIVE_LOW>;
+	status = "okay";	
+
+	fm25@0  {
+		compatible = "fm25";
+		size = <8192>;
+		address-width = <16>;
+		spi-max-frequency = <5000000>;
+		reg = <0>;
+	};
+};
+
+&uart1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart1>;
+	status = "okay";
+};
+
+&uart2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart2>;
+	status = "okay";
+};
+
+&uart3 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart3>;
+	status = "okay";
+};
+
+&usbotg {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_usb_otg>;
+	vbus-supply = <&reg_usb_otg_vbus>;
+	disable-over-current;
+	dr_mode = "host";
+	phy_type = "utmi";
+	status = "okay";
+};
+
+&gpu {
+	status = "okay";
+	qcom,gpu-pwrlevels {
+		compatible = "qcom,gpu-pwrlevels";
+		qcom,gpu-pwrlevel@0 {
+			qcom,gpu-freq = <200000000>;
+		};
+	};
+};
+
+&ldb {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_lvds0>;
+	status = "okay";
+	lvds0: lvds-channel@0 {
+		status = "okay";
+		port@0 {
+			reg = <0>;
+			lvds0_in: endpoint {
+				remote-endpoint = <&ipu_di0_lvds0>;
+			};
+		};
+		port@2 {
+			reg = <2>;
+			lvds0_out: endpoint {
+				remote-endpoint = <&panel_lcd>;
+			};
+		};
+	};
+};
+
+&pwm1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_pwm1>;
+	status = "okay";
+};
