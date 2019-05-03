@@ -469,6 +469,30 @@ static const struct panel_desc auo_b101aw03 = {
 	},
 };
 
+static const struct drm_display_mode auo_g065vn01_mode = {
+	.clock = 40000,
+	.hdisplay = 640,
+	.hsync_start = 640 + 112,
+	.hsync_end = 640 + 112 + 36,
+	.htotal = 640 + 112 + 36 + 32,
+	.vdisplay = 480,
+	.vsync_start = 480 + 33,
+	.vsync_end = 480 + 33 + 33,
+	.vtotal = 480 + 33 + 33 + 2,
+	.vrefresh = 60,
+};
+
+static const struct panel_desc auo_g065vn01 = {
+	.modes = &auo_g065vn01_mode,
+	.num_modes = 1,
+	.bpc = 6,
+	.size = {
+		.width = 132,
+		.height = 99,
+	},
+	.bus_format = MEDIA_BUS_FMT_RGB666_1X7X3_SPWG,
+};
+
 static const struct drm_display_mode auo_b101ean01_mode = {
 	.clock = 72500,
 	.hdisplay = 1280,
@@ -2544,6 +2568,9 @@ static const struct of_device_id platform_of_match[] = {
 	}, {
 		.compatible = "arm,rtsm-display",
 		.data = &arm_rtsm,
+	}, {
+		.compatible = "auo,g065vn01",
+		.data = &auo_g065vn01,
 	}, {
 		.compatible = "auo,b101aw03",
 		.data = &auo_b101aw03,
