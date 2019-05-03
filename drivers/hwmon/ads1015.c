@@ -286,7 +286,7 @@ static int ads1015_probe(struct i2c_client *client,
 			goto exit_remove;
 	}
 
-	data->hwmon_dev = hwmon_device_register(&client->dev);
+	data->hwmon_dev = hwmon_device_register_with_info(&client->dev, &client->name[0], NULL, NULL, NULL);		
 	if (IS_ERR(data->hwmon_dev)) {
 		err = PTR_ERR(data->hwmon_dev);
 		goto exit_remove;
