@@ -16,6 +16,8 @@
 #include <linux/input/mt.h>
 
 //[*]-------------------------------------------------------------------------[*]
+#define DEBUG
+
 #define DWAV_TOUCH_MAX_X            800
 #define DWAV_TOUCH_MAX_Y            480
 #define DWAV_TOUCH_MAX_ID           5
@@ -84,15 +86,22 @@ static void dwav_usb_mt_report(struct dwav_usb_mt *dwav_usb_mt)
 {
 	int		id;
 
-	for(id = 0; id < DWAV_TOUCH_MAX_ID; id++)	{
+	for(id = 0; id < DWAV_TOUCH_MAX_ID; id++)	
+	{
+		if(dwav_usb_mt->finger[id].status == TS_EVENT_UNKNOWN) {
+		   	//dev_info(&dwav_usb_mt->interface->dev, "TOUCH_UNKNOWN");
+			continue;
+		}
 
-		if(dwav_usb_mt->finger[id].status == TS_EVENT_UNKNOWN)  continue;
-
-		if( dwav_usb_mt->finger[id].x >= DWAV_TOUCH_MAX_X ||
-			dwav_usb_mt->finger[id].y >= DWAV_TOUCH_MAX_Y  )	continue;
+		if(dwav_usb_mt->finger[id].x >= DWAV_TOUCH_MAX_X ||
+		   dwav_usb_mt->finger[id].y >= DWAV_TOUCH_MAX_Y  ) {
+			//dev_info(&dwav_usb_mt->interface->dev, "OUT_OF_AREA");
+			continue;
+		}
 
     	input_mt_slot(dwav_usb_mt->input, id);
 
+		//dev_info(&dwav_usb_mt->interface->dev, "STATUS %u",dwav_usb_mt->finger[id].status);
 		if(dwav_usb_mt->finger[id].status != TS_EVENT_RELEASE)	{
             input_mt_report_slot_state(dwav_usb_mt->input, MT_TOOL_FINGER, true);
 			input_report_abs(dwav_usb_mt->input, ABS_MT_POSITION_X,  dwav_usb_mt->finger[id].x);
@@ -109,35 +118,43 @@ static void dwav_usb_mt_report(struct dwav_usb_mt *dwav_usb_mt)
 }
 
 //[*]-------------------------------------------------------------------------[*]
-static void dwav_usb_mt_process(struct dwav_usb_mt *dwav_usb_mt,
-                                   unsigned char *pkt, int len)
+static void dwav_usb_mt_process(struct dwav_usb_mt *dwav_usb_mt, unsigned char *pkt, int len)
 {
     struct  dwav_raw    *dwav_raw = (struct dwav_raw *)pkt;
     unsigned char       bit_mask, cnt;
 
-    for(cnt = 0, bit_mask = 0x01; cnt < DWAV_TOUCH_MAX_ID; cnt++, bit_mask <<= 1)   {
-        if((dwav_raw->ids & bit_mask) && dwav_raw->press)    {
+
+	if (dwav_raw->x1 && dwav_raw->y1) 
+	{
+		dwav_raw->ids = 1;
+	}
+
+    for(cnt = 0, bit_mask = 0x01; cnt < DWAV_TOUCH_MAX_ID; cnt++, bit_mask <<= 1)   
+	{
+        if((dwav_raw->ids & bit_mask) && dwav_raw->press)    
+		{
             dwav_usb_mt->finger[cnt].status = TS_EVENT_PRESS;
             switch(cnt) {
                 case    0:
-                    dwav_usb_mt->finger[cnt].x = cpu_to_be16(dwav_raw->x1);
-                    dwav_usb_mt->finger[cnt].y = cpu_to_be16(dwav_raw->y1);
+                    dwav_usb_mt->finger[cnt].x = cpu_to_be16(dwav_raw->x1)/10;
+                    dwav_usb_mt->finger[cnt].y = cpu_to_be16(dwav_raw->y1)/10;
+					//dev_info(&dwav_usb_mt->interface->dev, "X: %u y: %i", dwav_usb_mt->finger[cnt].x, dwav_usb_mt->finger[cnt].y);
                     break;
                 case    1:
-                    dwav_usb_mt->finger[cnt].x = cpu_to_be16(dwav_raw->x2);
-                    dwav_usb_mt->finger[cnt].y = cpu_to_be16(dwav_raw->y2);
+                    dwav_usb_mt->finger[cnt].x = cpu_to_be16(dwav_raw->x2)/10;
+                    dwav_usb_mt->finger[cnt].y = cpu_to_be16(dwav_raw->y2)/10;
                     break;
                 case    2:
-                    dwav_usb_mt->finger[cnt].x = cpu_to_be16(dwav_raw->x3);
-                    dwav_usb_mt->finger[cnt].y = cpu_to_be16(dwav_raw->y3);
+                    dwav_usb_mt->finger[cnt].x = cpu_to_be16(dwav_raw->x3)/10;
+                    dwav_usb_mt->finger[cnt].y = cpu_to_be16(dwav_raw->y3)/10;
                     break;
                 case    3:
-                    dwav_usb_mt->finger[cnt].x = cpu_to_be16(dwav_raw->x4);
-                    dwav_usb_mt->finger[cnt].y = cpu_to_be16(dwav_raw->y4);
+                    dwav_usb_mt->finger[cnt].x = cpu_to_be16(dwav_raw->x4)/10;
+                    dwav_usb_mt->finger[cnt].y = cpu_to_be16(dwav_raw->y4)/10;
                     break;
                 case    4:
-                    dwav_usb_mt->finger[cnt].x = cpu_to_be16(dwav_raw->x5);
-                    dwav_usb_mt->finger[cnt].y = cpu_to_be16(dwav_raw->y5);
+                    dwav_usb_mt->finger[cnt].x = cpu_to_be16(dwav_raw->x5)/10;
+                    dwav_usb_mt->finger[cnt].y = cpu_to_be16(dwav_raw->y5)/10;
                     break;
                 default :
                     break;
@@ -180,6 +197,8 @@ static void dwav_usb_mt_irq(struct urb *urb)
     		goto exit;
 	}
 
+	//dev_info(dev, "length %u status %i", urb->actual_length, urb->status);
+	
     dwav_usb_mt_process(dwav_usb_mt, dwav_usb_mt->data, urb->actual_length);
 
 exit:
@@ -340,11 +359,15 @@ static int dwav_usb_mt_probe(struct usb_interface *intf,
 
 	int err = 0;
 
-    if(!(endpoint = dwav_usb_mt_get_input_endpoint(intf->cur_altsetting)))
+	endpoint = dwav_usb_mt_get_input_endpoint(intf->cur_altsetting);
+    if(endpoint == NULL) {
         return  -ENXIO;
+	}
 
-    if(!(dwav_usb_mt = kzalloc(sizeof(struct dwav_usb_mt), GFP_KERNEL)))
+	dwav_usb_mt = (struct dwav_usb_mt*)kzalloc(sizeof(struct dwav_usb_mt), GFP_KERNEL);
+    if(dwav_usb_mt == NULL) {
         return  -ENOMEM;
+	}
 
 	if(!(dwav_usb_mt->finger = kzalloc(sizeof(finger_t) * DWAV_TOUCH_MAX_ID , GFP_KERNEL)))
         goto    err_free_mem;
@@ -406,8 +429,10 @@ static int dwav_usb_mt_probe(struct usb_interface *intf,
 
 	input_dev->dev.parent = &intf->dev;
 
-    if((err = dwav_usb_mt_init (dwav_usb_mt, (void *)input_dev)))
-        goto    err_free_urb;
+	err = dwav_usb_mt_init (dwav_usb_mt, (void *)input_dev);
+    if(err) {
+        goto err_free_urb;
+	}
 
 	usb_set_intfdata(intf, dwav_usb_mt);
 
